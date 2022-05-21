@@ -21,29 +21,22 @@
     <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <script src="script.js"></script>
-    <title>htmlMaze</title>
+    <title>MazeGame</title>
   </head>
   <body onload="onLoad();">
-    <h2>htmlMaze</h2>
+    <h2>Maze Game</h2>
+<h3><label id="minutes">00</label>:<label id="seconds">00</label></h3>
+   <input id="generate" type="button" value="Skip Maze" />
+<p></p>
     <canvas id="mainForm"></canvas>
-    <div id="settings">
+
       <table>
-        <tbody>
-          <tr>
-            <td><label for="cols">Columns:</label></td>
-            <td><input id="cols" type="text" size="5" value="20" /></td>
-          </tr><tr>
-            <td><label for="rows">Rows:</label></td>
-            <td><input id="rows" type="text" size="5" value="20" /></td>
-          </tr><tr>
-            <td>&nbsp;</td>
-            <td><input id="generate" type="button" value="Generate" /></td>
-          </tr>
-        </tbody>
+		<p id="dskip">times skipped: 0</p>
+ 		<p id="dmoves">moves: 0</p>
+ 		<p id="dbpress">button presses: 0</p>
+  		<p id="dbleft">WASD: 0</p>
+		<p id="dbright">IJKL: 0</p>
       </table>
-    </div>
-    <div id="footer">
-      &copy; 2017 <a href="mailto:JakesAddress@gmail.com">Jake (John) Moe</a>
-    </div>
+<img src="Controls.png" width="700px">
   </body>
 </html>
