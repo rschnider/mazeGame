@@ -15,6 +15,14 @@
  * along with htmlMaze.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+var sec = 0;
+    function pad ( val ) { return val > 9 ? val : "0" + val; }
+    setInterval( function(){
+        document.getElementById("seconds").innerHTML=pad(++sec%60);
+        document.getElementById("minutes").innerHTML=pad(parseInt(sec/60,10));
+    }, 1000);
+
+
 let ctx;
 let canvas;
 let maze;
@@ -58,22 +66,33 @@ class Maze {
     this.playerColor = "#880088";
     this.rows = rows;
     this.cellSize = cellSize;
-
+	
     this.cells = [];
 
-    this.generate()
+    this.score = 0;
+    this.skip = 0;
+    this.moves = 0;
+    this.bpress = 0;
+	this.bleft = 0;
+	this.bright = 0;  
+    this.scoreboard = document.querySelector('.scoreboard');
 
+    this.generate()
+    
   }
 
   generate() {
-
+		
     mazeHeight = this.rows * this.cellSize;
     mazeWidth = this.cols * this.cellSize;
 
-    canvas.height = mazeHeight;
+    canvas.height = mazeHeight+50;
     canvas.width = mazeWidth;
-    canvas.style.height = mazeHeight;
+    canvas.style.height = mazeHeight+50;
     canvas.style.width = mazeWidth;
+    
+    player.col = 0
+    player.row = 0
 
     for (let col = 0; col < this.cols; col++) {
       this.cells[col] = [];
@@ -92,7 +111,20 @@ class Maze {
     let dir;
     let foundNeighbor;
     let nextCell;
+    
+  	ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";    
+    ctx.fillText('score: ' + this.score,  mazeHeight/2,  mazeHeight+20);
 
+	this.updateScoreBoard();
+    this.updateSkip();
+	this.updateMoves();
+	this.updateBpress();
+	this.updateBleft();
+	this.updateBright();
+	  
     while (this.hasUnvisited(this.cells)) {
       currCell = stack[stack.length - 1];
       currCell.visited = true;
@@ -143,7 +175,7 @@ class Maze {
         currCell = stack.pop();
       }
     }
-
+		
     this.redraw();
 
   }
@@ -166,6 +198,35 @@ class Maze {
             (mazeCell.row !== (this.rows - 1) && !this.cells[mazeCell.col][mazeCell.row + 1].visited));
   }
 
+  updateScoreBoard() {
+	/*Qualtrics.SurveyEngine.setEmbeddedData("score1", this.score);*/
+  }
+  
+  updateSkip() {
+	/*Qualtrics.SurveyEngine.setEmbeddedData("skip1", this.skip);*/
+	document.getElementById("dskip").innerHTML = `times skipped: ${this.skip}`;
+  }
+  
+  updateMoves() {
+   	/*Qualtrics.SurveyEngine.setEmbeddedData("moves1", this.moves);*/
+	document.getElementById("dmoves").innerHTML = `moves: ${this.moves}`;
+  }
+  
+  updateBpress() {
+ 	/*Qualtrics.SurveyEngine.setEmbeddedData("bpress1", this.bpress);*/
+	document.getElementById("dbpress").innerHTML = `button presses: ${this.bpress}`;
+  }  
+
+  updateBleft() {
+ 	/*Qualtrics.SurveyEngine.setEmbeddedData("bleft1", this.bleft);*/
+	document.getElementById("dbleft").innerHTML = `WASD: ${this.bleft}`;
+  }  
+
+  updateBright() {
+ 	/*Qualtrics.SurveyEngine.setEmbeddedData("bright1", this.bright);*/
+	document.getElementById("dbright").innerHTML = `IJKL: ${this.bright}`;
+  }  	  
+	  
   redraw() {
 
     ctx.fillStyle = this.backgroundColor;
@@ -176,7 +237,8 @@ class Maze {
 
     ctx.strokeStyle = this.mazeColor;
     ctx.strokeRect(0, 0, mazeHeight, mazeWidth);
-
+    	
+      
     for (let col = 0; col < this.cols; col++) {
       for (let row = 0; row < this.rows; row++) {
         if (this.cells[col][row].eastWall) {
@@ -205,51 +267,144 @@ class Maze {
         }
       }
     }
-
+    ctx.beginPath();
+    ctx.arc((player.col * this.cellSize) + 12.5, (player.row * this.cellSize) + 12.5, this.cellSize/2-2, 0, 2 * Math.PI, false);
+    ctx.closePath();
     ctx.fillStyle = this.playerColor;
-    ctx.fillRect((player.col * this.cellSize) + 2, (player.row * this.cellSize) + 2, this.cellSize - 4, this.cellSize - 4);
+    ctx.fill();
+    if (player.col == this.cols -1 && player.row == this.rows -1) {
+      this.score++;
+      this.generate();
+			this.updateScoreBoard();
+    }
 
   }
 
 }
 
 function onClick(event) {
-  maze.cols = document.getElementById("cols").value;
-  maze.rows = document.getElementById("rows").value;
   maze.generate();
+  maze.skip++;
+  maze.updateSkip();
 }
 
 function onKeyDown(event) {
   switch (event.keyCode) {
-    case 37:
+ /*   case 116 : //F5 button
+      event.returnValue = false;
+      event.keyCode = 0;
+      return false;
+    case 82 : //R button
+      if (event.ctrlKey)
+      { 
+        event.returnValue = false;
+        event.keyCode = 0;
+        return false;
+      }
+      break; */
+	case 32: 	
+      maze.generate();
+      maze.skip++;
+      maze.updateSkip();      
+      break;
+    //case 37:
     case 65:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bleft++;
+	  maze.updateBleft(); 		  
       if (!maze.cells[player.col][player.row].westWall) {
         player.col -= 1;
+        maze.moves++;
+        maze.updateMoves();
       }
       break;
-    case 39:
+    case 74:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bright++;		  
+	  maze.updateBright(); 		  
+      if (!maze.cells[player.col][player.row].westWall) {
+        player.col -= 1;
+        maze.moves++;
+        maze.updateMoves();
+      }
+      break;		  
+    //case 39:
     case 68:
+	  maze.bpress++;
+      maze.updateBpress();		  
+      maze.bleft++;
+	  maze.updateBleft(); 
       if (!maze.cells[player.col][player.row].eastWall) {
         player.col += 1;
+        maze.moves++;
+        maze.updateMoves();		
+      }
+      break;  
+    case 76:
+	  maze.bpress++;
+      maze.updateBpress();		  
+      maze.bright++;		  
+	  maze.updateBright(); 
+      if (!maze.cells[player.col][player.row].eastWall) {
+        player.col += 1;
+        maze.moves++;
+        maze.updateMoves();
       }
       break;
-    case 40:
+    //case 40:
     case 83:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bleft++;
+	  maze.updateBleft();		  
       if (!maze.cells[player.col][player.row].southWall) {
         player.row += 1;
+        maze.moves++;
+        maze.updateMoves();
       }
       break;
-    case 38:
+    case 75:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bright++;		  
+	  maze.updateBright(); 		  
+      if (!maze.cells[player.col][player.row].southWall) {
+        player.row += 1;
+        maze.moves++;
+        maze.updateMoves();
+      }
+      break;		  
+    //case 38:
     case 87:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bleft++;
+	  maze.updateBleft();		  
       if (!maze.cells[player.col][player.row].northWall) {
         player.row -= 1;
+        maze.moves++;
+        maze.updateMoves();
       }
       break;
+    case 73:
+      maze.bpress++;
+      maze.updateBpress();
+      maze.bright++;		  
+	  maze.updateBright(); 		  
+      if (!maze.cells[player.col][player.row].northWall) {
+        player.row -= 1;
+        maze.moves++;
+        maze.updateMoves();
+      }
+      break;		  
     default:
       break;
   }
   maze.redraw();
 }
+
 
 function onLoad() {
 
@@ -257,7 +412,7 @@ function onLoad() {
   ctx = canvas.getContext("2d");
 
   player = new Player();
-  maze = new Maze(20, 20, 25);
+  maze = new Maze(12, 12, 25);
 
   document.addEventListener("keydown", onKeyDown);
   document.getElementById("generate").addEventListener("click", onClick);
